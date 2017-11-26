@@ -1,0 +1,20 @@
+<resources>
+    <!--common-->
+    <string name="app_name">SecondLabIS</string>
+    <!--mainActivity -->
+    <string name="btn_about_program_main_a">О программе</string>
+    <string name="btn_about_algorithm_main_a">DES OFB</string>
+    <string name="btn_encrypt_file_main_a">Кодирование файла</string>
+    <string name="btn_decrypt_file_main_a">Декодирование файла</string>
+    <string name="tv_work_with_file_main_a">Работа с файлами</string>
+    <string name="tv_work_with_strings_main_a">Работа со строками</string>
+    <string name="et_encrypt_string_main_a">Строка кодирования*</string>
+    <string name="et_decrypt_string_main_a">Строка декодирования*</string>
+    <string name="tv_comment_main_a">* маскимальная длинна строки 50 символов </string>
+    <string name="btn_encode_string_main_a">Кодирование</string>
+    <string name="btn_decode_string_main_a">Декодирование</string>
+    <!--aboutProgramActivity-->
+    <string name="tv_about_program_ap_a">Описание задания</string>
+    <!--aboutAlgorithmActivity-->
+    <string name="tv_about_algorithm_aa_a">Описание алгоритма</string>
+</resources>
