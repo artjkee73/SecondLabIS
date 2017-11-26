@@ -1,23 +1,28 @@
 package com.example.artemqa.secondlabis.ui;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.artemqa.secondlabis.R;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Button btnAboutAlg,btnAboutProg,btnEncodeFile,btnDecodeFile,btnEncodeStr,btnDecodeStr;
     EditText etEncryptStr,etDecryptStr;
-    private final static String ORIGINAL_TEXT_FILE_NAME = "textFile.txt";
-    private final static String ENCRYPT_TEXT_FILE_NAME = "encryptTextFile.txt";
-    private final static String DECRYPT_TEXT_FILE_NAME = "decryptTextFile.txt";
-    private final static String ORIGINAL_IMG_FILE_NAME = "imgFile.png";
-    private final static String ENCRYPT_IMG_FILE_NAME = "encryptImgFile.png";
-    private final static String DECRYPT_IMG_FILE_NAME = "decryptImgFile.png";
+    private final static String LOG = "MyLog";
+    private final static int REQUEST_CODE_CHOOSE_FILE_ENCRYPT = 0;
+    private final static int REQUEST_CODE_CHOOSE_FILE_DECRYPT = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,11 +61,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btn_encrypt_file_main_a:
-                encryptFile(ORIGINAL_TEXT_FILE_NAME);
+                chooseFileEncrypt();
                 break;
 
             case R.id.btn_decrypt_file_main_a:
-                decryptFile(ENCRYPT_TEXT_FILE_NAME);
+                chooseFileDecrypt();
                 break;
 
             case R.id.btn_encode_string_main_a:
@@ -75,12 +80,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    private void encryptFile(Uri uriChooseFile ) {
+            try {
+                FileInputStream fis = new FileInputStream(new File(uriChooseFile.getPath()));
+                Log.d(LOG,"Path to choose file" + uriChooseFile.getPath().toString() );
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
 
-    private void encryptFile(String fileName) {
-        // описать шифрование файла входного в цикл в файл  ENCRYPT_TEXT_FILE_NAME
+    private void chooseFileEncrypt() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("file/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(intent, REQUEST_CODE_CHOOSE_FILE_ENCRYPT);
     }
-    private void decryptFile(String fileName) {
-        // описать дешифрование зашифрованного файла ENCRYPT_TEXT_FILE_NAME в файл DECRYPT_TEXT_FILE_NAME
+
+    private void chooseFileDecrypt() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("file/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(intent, REQUEST_CODE_CHOOSE_FILE_DECRYPT);
+    }
+
+    private void decryptFile(Uri uriChooseFile){
+        Log.d(LOG,"decryptFile data :" + uriChooseFile.toString());
     }
     private void encryptString(String strForEncrypt) {
         // описать шифрование строки и сохрение результатов в etDecryptStr.getText().toString()
@@ -91,6 +115,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Uri uriChooseFile;
+        if(resultCode == RESULT_OK){
+            switch (requestCode){
+                case REQUEST_CODE_CHOOSE_FILE_ENCRYPT:
+                    uriChooseFile = data.getData();
+                    encryptFile(uriChooseFile);
+                    Log.d(LOG,"Uri choose encrypting file " + uriChooseFile.toString());
+                    break;
+                case REQUEST_CODE_CHOOSE_FILE_DECRYPT:
+                    uriChooseFile = data.getData();
+                    decryptFile(uriChooseFile);
+                    Log.d(LOG,"Uri choose decrypting file " + uriChooseFile.toString());
+                    break;
+            }
+        }
+    }
 
 }
