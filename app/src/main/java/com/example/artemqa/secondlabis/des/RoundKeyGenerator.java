@@ -2,7 +2,7 @@ package com.example.artemqa.secondlabis.des;
 
 
 
-public class RoundKeyGenerator
+class RoundKeyGenerator
 {
     /**
      * Values for the Permutation Choice 1 table for the initial permutation of the 56-bit key.

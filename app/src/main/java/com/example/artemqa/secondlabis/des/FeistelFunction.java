@@ -2,7 +2,7 @@ package com.example.artemqa.secondlabis.des;
 
 
 
-public class FeistelFunction
+class FeistelFunction
 {
     /**
      * Values for the Expansion Permutation (E) step.

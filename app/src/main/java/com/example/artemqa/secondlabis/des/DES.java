@@ -12,7 +12,7 @@ package com.example.artemqa.secondlabis.des;
  *  http://en.wikipedia.org/wiki/DES_supplementary_material
  */
 
-public class DES
+class DES
 {
     protected final static long MASK_6_BITS     = 0xFC0000000000L;
     protected final static long MASK_32_BITS    = 0xFFFFFFFFL;
@@ -59,19 +59,19 @@ public class DES
     }
 
     /**
-     * Wrapper for CBCMode(), specifying encryption.
+     * Wrapper for OFBMode(), specifying encryption.
      */
-    public long[] CBCEncrypt(long plainTexts[], long key, long IV)
+    public long[] OFBEncrypt(long plainTexts[], long key, long IV)
     {
-        return CBCMode(plainTexts, key, IV, true);
+        return OFBMode(plainTexts, key, IV, true);
     }
 
     /**
-     * Wrapper for CBCMode(), specifying encryption.
+     * Wrapper for OFBMode(), specifying encryption.
      */
-    public long[] CBCDecrypt(long cipherTexts[], long key, long IV)
+    public long[] OFBDecrypt(long cipherTexts[], long key, long IV)
     {
-        return CBCMode(cipherTexts, key, IV, false);
+        return OFBMode(cipherTexts, key, IV, false);
     }
 
     /**
@@ -93,11 +93,11 @@ public class DES
 
     /**
      * Implements the DES cipher on 64 bit blocks in @param input using @param key in CBC mode.
-     * CBC mode encryption or decryption can be specified with @param encrypt.
+     * OFB mode encryption or decryption can be specified with @param encrypt.
      *
      * @return An array of 64 bit blocks that have been ciphered through DES CBC mode.
      */
-    private long[] CBCMode(long[] inputs, long key, long IV, boolean encrypt)
+    private long[] OFBMode(long[] inputs, long key, long IV, boolean encrypt)
     {
         long[] outputs = new long[inputs.length];
 
