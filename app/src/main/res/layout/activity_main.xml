@@ -112,5 +112,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="@string/tv_comment_main_a" />
+        <TextView
+            android:id="@+id/tv_generated_key_main_a"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </ScrollView>

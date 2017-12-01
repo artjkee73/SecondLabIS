@@ -2,38 +2,52 @@ package com.example.artemqa.secondlabis.ui;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.artemqa.secondlabis.R;
-import com.example.artemqa.secondlabis.des.DESInterface;
+import com.example.artemqa.secondlabis.des.DES;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Button btnAboutAlg, btnAboutProg, btnEncodeFile, btnDecodeFile, btnEncodeStr, btnDecodeStr;
     EditText etEncryptStr, etDecryptStr;
+    TextView tvGenKey;
     private final static String LOG = "MyLog";
     private final static int REQUEST_CODE_CHOOSE_FILE_ENCRYPT = 0;
     private final static int REQUEST_CODE_CHOOSE_FILE_DECRYPT = 1;
     private final static String CONCAT_ENCRYPT = "ENCRYPTED";
     private final static String CONCAT_DECRYPT = "DECRYPTED";
+    private String strKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        generateKey();
+        Log.d(LOG,"generateKey" + strKey);
         btnAboutAlg = findViewById(R.id.btn_about_algorithm_main_a);
         btnAboutAlg.setOnClickListener(this);
         btnAboutProg = findViewById(R.id.btn_about_program_main_a);
@@ -49,6 +63,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         etEncryptStr = findViewById(R.id.et_encrypt_string_main_a);
         etDecryptStr = findViewById(R.id.et_decrypt_string_main_a);
+
+        tvGenKey = findViewById(R.id.tv_generated_key_main_a);
+        tvGenKey.setText(generateKey());
 
     }
 
@@ -88,59 +105,69 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void chooseFileEncrypt() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("file/*");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(intent, REQUEST_CODE_CHOOSE_FILE_ENCRYPT);
     }
 
     private void chooseFileDecrypt() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("file/*");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(intent, REQUEST_CODE_CHOOSE_FILE_DECRYPT);
     }
 
     private void encryptFile(Uri uriChooseFile) {
+
+        File file = new File(uriChooseFile.getPath());
+        byte[] buffer = new byte[(int) file.length()];
         try {
-            FileInputStream fis = new FileInputStream(new File(uriChooseFile.getPath()));
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer, 0, fis.available());
-
-            DESInterface desInterface = new DESInterface();
-            byte[] encryptedByteArray = desInterface.encrypt(buffer);
-            writeEncryptByteArrayToFile(uriChooseFile, encryptedByteArray);
-
+            FileInputStream fis = new FileInputStream(file);
+            fis.read(buffer);
+            fis.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        byte[] encryptedByteArray = DES.encryptOFB(buffer, DES.passwordToKey(tvGenKey.getText().toString()));
+        writeEncryptByteArrayToFile(uriChooseFile, encryptedByteArray);
+
     }
 
     private void decryptFile(Uri uriChooseFile) {
+        File file = new File(uriChooseFile.getPath());
+        byte[] buffer = new byte[(int) file.length()];
         try {
-            FileInputStream fis = new FileInputStream(new File(uriChooseFile.getPath()));
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer, 0, fis.available());
-
-            DESInterface desInterface = new DESInterface();
-            byte[] decryptedByteArray = desInterface.encrypt(buffer);
-            writeDecryptByteArrayToFile(uriChooseFile, decryptedByteArray);
-
+            FileInputStream fis = new FileInputStream(file);
+            fis.read(buffer);
+            fis.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        byte[] decryptedByteArray = DES.encryptOFB(buffer, DES.passwordToKey(tvGenKey.getText().toString()));
+        writeDecryptByteArrayToFile(uriChooseFile, decryptedByteArray);
     }
 
     private void encryptString(String strForEncrypt) {
-        byte[] arrayForEncrypting = strForEncrypt.getBytes();
-        DESInterface desInterface = new DESInterface();
-        byte[] encryptedBytesArray = desInterface.encrypt(arrayForEncrypting);
-        etDecryptStr.setText(new String(encryptedBytesArray));
+        byte[] arrayForEncrypting = new byte[0];
+        try {
+            arrayForEncrypting = strForEncrypt.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        byte[] encryptedBytesArray = DES.encryptOFB(arrayForEncrypting, DES.passwordToKey(tvGenKey.getText().toString()));
+        etDecryptStr.setText(new String(encryptedBytesArray, Charset.forName("UTF-8")));
     }
 
     private void decryptString(String strForDecrypt) {
-        byte[] arrayForDecrypting = strForDecrypt.getBytes();
-        DESInterface desInterface = new DESInterface();
-        byte[] decryptedBytesArray = desInterface.decrypt(arrayForDecrypting);
-        etEncryptStr.setText(new String(decryptedBytesArray));
+        byte[] arrayForDecrypting = new byte[0];
+        try {
+            arrayForDecrypting = strForDecrypt.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        byte[] decryptedBytesArray = DES.decryptOFB(arrayForDecrypting, DES.passwordToKey(tvGenKey.getText().toString()));
+        etEncryptStr.setText(new String(decryptedBytesArray, Charset.forName("UTF-8")));
     }
 
 
@@ -176,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         try (FileOutputStream fos = new FileOutputStream(encryptedFilePath)) {
             fos.write(encryptedByteArray, 0, encryptedByteArray.length);
+            fos.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -190,11 +218,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String bufferStr = forDecryptingPath.substring(0, endDir);
         String decryptedFilePath = bufferStr + decryptedFileName;
         Log.d(LOG, "decryptedFilePath " + decryptedFilePath);
-
+        Log.d(LOG,"generateKey decryptedFile " + strKey);
         try (FileOutputStream fos = new FileOutputStream(decryptedFilePath)) {
             fos.write(encryptedByteArray, 0, encryptedByteArray.length);
+            fos.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private String generateKey(){
+        strKey = "";
+        Random rand = new Random();
+        for (int i = 0; i < 8; i++) {
+            strKey += (char) rand.nextInt(256);
+        }
+        return strKey;
     }
 }
